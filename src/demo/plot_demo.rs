@@ -177,6 +177,7 @@ impl Widget for &mut LineDemo {
 #[derive(PartialEq, Default)]
 pub struct PlotDemo {
     line_demo: LineDemo,
+    string: String,
     // open_panel: Panel,
 }
 
@@ -196,6 +197,7 @@ impl super::Demo for PlotDemo {
     }
 }
 
+use rfd::*;
 use crate::demo::View;
 impl super::View for PlotDemo {
     fn ui(&mut self, ui: &mut Ui) {
@@ -212,6 +214,19 @@ impl super::View for PlotDemo {
                 }
                 ui.label("Reset view with double-click.");
             });
+        });
+
+        ui.separator();
+        let string = &mut self.string;
+        ui.horizontal(|ui| {
+            ui.add(egui::TextEdit::singleline(string).hint_text("Write something here"));
+            if ui.add(Button::new("select file")).clicked() {
+                let files = FileDialog::new()
+                    .add_filter("text", &["txt", "rs"])
+                    .set_directory("")
+                    .pick_file();
+                *string = files.unwrap().into_os_string().into_string().unwrap();
+            }
         });
         ui.separator();
         // ui.horizontal(|ui| {
