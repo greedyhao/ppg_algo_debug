@@ -50,24 +50,24 @@ impl LineDemo {
             ui.group(|ui| {
                 ui.vertical(|ui| {
                     ui.label("Circle:");
-                    // ui.add(
-                    //     egui::DragValue::new(circle_radius)
-                    //         .speed(0.1)
-                    //         .clamp_range(0.0..=f64::INFINITY)
-                    //         .prefix("r: "),
-                    // );
-                    // ui.horizontal(|ui| {
-                    //     ui.add(
-                    //         egui::DragValue::new(&mut circle_center.x)
-                    //             .speed(0.1)
-                    //             .prefix("x: "),
-                    //     );
-                    //     ui.add(
-                    //         egui::DragValue::new(&mut circle_center.y)
-                    //             .speed(1.0)
-                    //             .prefix("y: "),
-                    //     );
-                    // });
+                    ui.add(
+                        egui::DragValue::new(circle_radius)
+                            .speed(0.1)
+                            .clamp_range(0.0..=f64::INFINITY)
+                            .prefix("r: "),
+                    );
+                    ui.horizontal(|ui| {
+                        ui.add(
+                            egui::DragValue::new(&mut circle_center.x)
+                                .speed(0.1)
+                                .prefix("x: "),
+                        );
+                        ui.add(
+                            egui::DragValue::new(&mut circle_center.y)
+                                .speed(1.0)
+                                .prefix("y: "),
+                        );
+                    });
                 });
             });
 
@@ -127,6 +127,17 @@ impl LineDemo {
         .name("wave")
     }
 
+    fn sample(&self) -> Line {
+        Line::new(Values::from_parametric_callback(
+            move |t| (t, 1.0),
+            0.0..=5.0,
+            256
+        ))
+        .color(Color32::from_rgb(200, 100, 100))
+        .style(self.line_style)
+        .name("sample")
+    }
+
     fn thingy(&self) -> Line {
         let time = self.time;
         Line::new(Values::from_parametric_callback(
@@ -151,6 +162,7 @@ impl Widget for &mut LineDemo {
             .line(self.circle())
             .line(self.sin())
             .line(self.thingy())
+            .line(self.sample())
             .legend(Legend::default());
         if self.square {
             plot = plot.view_aspect(1.0);
