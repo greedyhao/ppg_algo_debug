@@ -1,3 +1,4 @@
+use eframe::*;
 use eframe::egui::*;
 use plot::{
     Arrows, Corner, HLine, Legend, Line, LineStyle, MarkerShape, Plot, PlotImage, Points, Polygon,
@@ -14,7 +15,7 @@ pub struct LineDemo {
     square: bool,
     proportional: bool,
     line_style: LineStyle,
-    pub open: bool,
+    open: bool,
 }
 
 impl Default for LineDemo {
@@ -164,6 +165,7 @@ impl Widget for &mut LineDemo {
 #[derive(PartialEq, Default)]
 pub struct PlotDemo {
     line_demo: LineDemo,
+    // open_panel: Panel,
 }
 
 impl super::Demo for PlotDemo {
@@ -172,15 +174,56 @@ impl super::Demo for PlotDemo {
     }
 
     fn show(&mut self, ctx: &eframe::egui::CtxRef, open: &mut bool) {
-        // use super::View;
-        // use crate::plot_ppg::containers::Window;
         Window::new(self.name())
             .open(open)
             .default_size(vec2(400.0, 400.0))
             .scroll(false)
             .show(ctx, |ui| {
-                // self.ui(ui)
-                ui.heading("plot template");
+                self.ui(ui);
             });
     }
 }
+
+use crate::demo::View;
+impl super::View for PlotDemo {
+    fn ui(&mut self, ui: &mut Ui) {
+        ui.horizontal(|ui| {
+            egui::reset_button(ui, self);
+            ui.collapsing("Instructions", |ui| {
+                ui.label("Pan by dragging, or scroll (+ shift = horizontal).");
+                if cfg!(target_arch = "wasm32") {
+                    ui.label("Zoom with ctrl / ⌘ + mouse wheel, or with pinch gesture.");
+                } else if cfg!(target_os = "macos") {
+                    ui.label("Zoom with ctrl / ⌘ + scroll.");
+                } else {
+                    ui.label("Zoom with ctrl + scroll.");
+                }
+                ui.label("Reset view with double-click.");
+            });
+        });
+        ui.separator();
+        // ui.horizontal(|ui| {
+            // ui.selectable_value(&mut self.open_panel, Panel::Lines, "Lines");
+            // ui.selectable_value(&mut self.open_panel, Panel::Markers, "Markers");
+            // ui.selectable_value(&mut self.open_panel, Panel::Legend, "Legend");
+            // ui.selectable_value(&mut self.open_panel, Panel::Items, "Items");
+        // });
+        // ui.separator();
+
+        // match self.open_panel {
+        //     Panel::Lines => {
+                ui.add(&mut self.line_demo);
+        //     }
+        //     Panel::Markers => {
+        //         ui.add(&mut self.marker_demo);
+        //     }
+        //     Panel::Legend => {
+        //         ui.add(&mut self.legend_demo);
+        //     }
+        //     Panel::Items => {
+        //         ui.add(&mut self.items_demo);
+        //     }
+        // }
+    }
+}
+
