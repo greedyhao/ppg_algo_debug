@@ -150,7 +150,7 @@ impl super::View for PlotDemo {
             ui.add(egui::TextEdit::singleline(string).hint_text("Write something here"));
             if ui.add(Button::new("select file")).clicked() {
                 let files = FileDialog::new()
-                    .add_filter("text", &["txt", "rs"])
+                    .add_filter("text", &["txt"])
                     .set_directory("")
                     .pick_file();
                 *string = files.unwrap().into_os_string().into_string().unwrap();

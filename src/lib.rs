@@ -3,6 +3,7 @@
 #![warn(clippy::all, rust_2018_idioms)]
 
 mod demo;
+mod file2data;
 // pub use app::TemplateApp;
 
 // // ----------------------------------------------------------------------------
