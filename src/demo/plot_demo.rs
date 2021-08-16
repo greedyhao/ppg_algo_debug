@@ -1,8 +1,11 @@
 use eframe::*;
 use eframe::egui::*;
+// use plot::{
+//     Arrows, Corner, HLine, Legend, Line, LineStyle, MarkerShape, Plot, PlotImage, Points, Polygon,
+//     Text, VLine, Value, Values,
+// };
 use plot::{
-    Arrows, Corner, HLine, Legend, Line, LineStyle, MarkerShape, Plot, PlotImage, Points, Polygon,
-    Text, VLine, Value, Values,
+    Legend, Line, LineStyle, Plot, Values,
 };
 // use std::f64::consts::TAU;
 
@@ -80,6 +83,19 @@ impl LineDemo {
         .style(self.line_style)
         .name("sample")
     }
+
+    fn ppg(&self, data: Vec<i32>) -> Line {
+        let len = data.len() - 1;
+        Line::new(Values::from_explicit_callback(
+            move |t| data[t as usize] as f64,
+            0.0..len as f64,
+            256
+        ))
+        .color(Color32::from_rgb(200, 100, 100))
+        .style(self.line_style)
+        .name("ppg")
+    }
+
 }
 
 impl Widget for &mut LineDemo {
@@ -107,6 +123,7 @@ pub struct PlotDemo {
     line_demo: LineDemo,
     string: String,
     // open_panel: Panel,
+    plot_data: bool,
 }
 
 impl super::Demo for PlotDemo {
@@ -145,18 +162,32 @@ impl super::View for PlotDemo {
         });
 
         ui.separator();
-        let string = &mut self.string;
         ui.horizontal(|ui| {
-            ui.add(egui::TextEdit::singleline(string).hint_text("Write something here"));
+            ui.add(egui::TextEdit::singleline(&mut self.string).hint_text("Write something here"));
             if ui.add(Button::new("select file")).clicked() {
                 let files = FileDialog::new()
                     .add_filter("text", &["txt"])
                     .set_directory("")
                     .pick_file();
-                *string = files.unwrap().into_os_string().into_string().unwrap();
+                self.string = files.unwrap().into_os_string().into_string().unwrap();
+            }
+            if ui.add(Button::new("import data")).clicked() {
+                self.plot_data = true;
             }
         });
         ui.separator();
+        if self.plot_data {
+            use crate::file2data::get_cols::*;
+            let cols = get_cols_vec_from_file((self.string).to_string().clone());
+
+            let (_, v) = cols;
+            let col0 = get_col_from_cols_vec(0, &v);
+
+            let plot = Plot::new("lines_demo")
+                .line(self.line_demo.ppg(col0))
+                .legend(Legend::default());
+            ui.add(plot);
+        }
         // ui.horizontal(|ui| {
             // ui.selectable_value(&mut self.open_panel, Panel::Lines, "Lines");
             // ui.selectable_value(&mut self.open_panel, Panel::Markers, "Markers");
@@ -167,7 +198,7 @@ impl super::View for PlotDemo {
 
         // match self.open_panel {
         //     Panel::Lines => {
-                ui.add(&mut self.line_demo);
+                // ui.add(&mut self.line_demo);
         //     }
         //     Panel::Markers => {
         //         ui.add(&mut self.marker_demo);
